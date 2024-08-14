@@ -1,5 +1,5 @@
-import React, { useContext, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, Image, StyleSheet } from 'react-native';
+import React, { useContext, useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, FlatList, Image, StyleSheet, Animated } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppContext } from '../context/appContext';
 import axios from 'axios';
@@ -9,6 +9,7 @@ function PanelSide() {
   const { socket, currentRoom, setCurrentRoom, members, setMembers, privateMemberMsg, setPrivateMsg, rooms, setRooms } = useContext(AppContext);
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
+  const animationValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     socket.off('new-user').on('new-user', (payload) => {
@@ -73,6 +74,27 @@ function PanelSide() {
     joinRoom(roomId, false);
   }
 
+  useEffect(() => {
+    const animateGlow = () => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(animationValue, {
+            toValue: 1,
+            duration: 1500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(animationValue, {
+            toValue: 0,
+            duration: 1500,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    };
+
+    animateGlow();
+  }, [animationValue]);
+
   const renderRoomItem = ({ item: room }) => (
     <TouchableOpacity
       style={[
@@ -107,11 +129,29 @@ function PanelSide() {
         <Text style={styles.memberName}>
           {member.name} {member._id === user._id && "(You)"} {member.status === "offline" && "(Offline)"}
         </Text>
-        <View style={styles.memberStatus}>
+        <Animated.View
+          style={[
+            styles.memberStatus,
+            {
+              opacity: animationValue.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.5, 1],
+              }),
+              transform: [
+                {
+                  scale: animationValue.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [1, 1.1],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
           <Text style={styles.badgeText}>
             {user.newMessages[orderIds(member._id, user._id)]}
           </Text>
-        </View>
+        </Animated.View>
       </View>
     </TouchableOpacity>
   );
@@ -176,6 +216,10 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     marginRight: 10,
+    shadowColor: '#fff',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
   },
   memberName: {
     flex: 1,
@@ -185,6 +229,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#007bff',
     borderRadius: 10,
     paddingHorizontal: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

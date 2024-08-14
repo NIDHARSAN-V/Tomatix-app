@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { View, Text, TextInput, Button, ScrollView, Image, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, ScrollView, Image, StyleSheet, Animated, Easing } from 'react-native';
 import { useSelector } from 'react-redux';
 import { AppContext } from '../context/appContext';
 
@@ -8,10 +8,20 @@ function MessageForm() {
   const scrollViewRef = useRef(null);
   const [message, setMessage] = useState("");
   const { socket, currentRoom, messages, setMessages, privateMemberMsg } = useContext(AppContext);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      easing: Easing.ease,
+      useNativeDriver: true,
+    }).start();
+  }, [fadeAnim]);
 
   function scrollToBottom() {
     scrollViewRef.current?.scrollToEnd({ animated: true });
@@ -46,7 +56,7 @@ function MessageForm() {
   }
 
   return (
-    <>
+    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
       <ScrollView style={styles.messagesOutput} ref={scrollViewRef} onContentSizeChange={scrollToBottom}>
         {user && !privateMemberMsg?._id && (
           <View style={styles.alert}>
@@ -91,14 +101,24 @@ function MessageForm() {
         />
         <Button title="Send" onPress={handleSubmit} color="orange" disabled={!user} />
       </View>
-    </>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   messagesOutput: {
     flex: 1,
+    backgroundColor: '#1a1a1a',
+    borderColor: '#222',
+    borderWidth: 5,
+    borderRadius: 10,
+    overflow: 'scroll',
+    marginBottom: 20,
     padding: 10,
+    boxShadow: '0 0 15px rgba(255, 255, 255, 0.2)', // Note: React Native doesn't support box-shadow
   },
   alert: {
     backgroundColor: '#d1ecf1',
@@ -132,6 +152,7 @@ const styles = StyleSheet.create({
     padding: 5,
     borderRadius: 5,
     marginBottom: 10,
+    color: '#ccc',
   },
   message: {
     alignSelf: 'flex-end',
@@ -165,9 +186,11 @@ const styles = StyleSheet.create({
   },
   messageSender: {
     fontWeight: 'bold',
+    color: '#e0e0e0',
   },
   messageContent: {
     marginBottom: 5,
+    color: '#fff',
   },
   messageTimestamp: {
     alignSelf: 'flex-end',

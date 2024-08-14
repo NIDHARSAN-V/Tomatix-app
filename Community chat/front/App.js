@@ -11,6 +11,7 @@ import HomePage from './pages/HomePage';
 import Login from './pages/Login';
 import Chat from './pages/Chat';
 import Signup from './pages/Signup';
+import { HomeLS } from './Routes/HomeLS';
 
 const Stack = createStackNavigator();
 
@@ -45,12 +46,8 @@ function App() {
           }}
         >
           <NavigationContainer>
-            <Stack.Navigator>
               <Stack.Screen name="Home" component={HomePage} />
-              <Stack.Screen name="Login" component={Login} />
-              <Stack.Screen name="Signup" component={Signup} />
-              <Stack.Screen name="Chat" component={Chat} />
-            </Stack.Navigator>
+            {/* <HomeLS/> */}
           </NavigationContainer>
         </AppContext.Provider>
       </PersistGate>

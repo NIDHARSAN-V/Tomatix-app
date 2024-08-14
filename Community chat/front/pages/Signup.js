@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Image, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, TextInput, Button, Image, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker'; // For selecting images
 import axios from 'axios';
@@ -13,6 +13,17 @@ function Signup() {
   const [uploading, setUploading] = useState(false);
   const [signupUser] = useSignupUserMutation();
   const navigation = useNavigation();
+
+  // Fade-in animation
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+  }, [fadeAnim]);
 
   const handleImagePick = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -63,7 +74,7 @@ function Signup() {
   };
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
       <Text style={styles.header}>Create Account</Text>
       <TouchableOpacity onPress={handleImagePick} style={styles.imageContainer}>
         <Image source={image ? { uri: image } : require('./favicon.png')} style={styles.profileImage} />
@@ -96,7 +107,7 @@ function Signup() {
           <Text style={styles.link}> Log in</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -114,11 +125,23 @@ const styles = StyleSheet.create({
   imageContainer: {
     alignItems: 'center',
     marginBottom: 20,
+    position: 'relative',
+    maxWidth: 100,
+    width: 100,
+    height: 100,
+    margin: 'auto',
+    borderRadius: 50,
   },
   profileImage: {
     width: 100,
     height: 100,
     borderRadius: 50,
+    borderColor: 'rgba(255, 0, 0, 0.8)',
+    borderWidth: 2,
+    shadowColor: 'rgba(255, 0, 0, 0.5)',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 1,
+    shadowRadius: 10,
   },
   imageText: {
     marginTop: 10,

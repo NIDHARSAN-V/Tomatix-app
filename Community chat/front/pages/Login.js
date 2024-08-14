@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useLoginUserMutation } from '../services/appApi';
 import { AppContext } from '../context/appContext';
@@ -26,7 +26,8 @@ function Login() {
   return (
     <View style={styles.container}>
       <View style={styles.form}>
-        <Text style={styles.label}>Email address</Text>
+        <Text style={styles.header}>Login</Text>
+        
         <TextInput
           style={styles.input}
           placeholder="Enter email"
@@ -34,9 +35,8 @@ function Login() {
           onChangeText={setEmail}
           keyboardType="email-address"
         />
-        <Text style={styles.text}>We'll never share your email with anyone else.</Text>
+        <Text style={styles.helperText}>We'll never share your email with anyone else.</Text>
 
-        <Text style={styles.label}>Password</Text>
         <TextInput
           style={styles.input}
           placeholder="Password"
@@ -45,11 +45,21 @@ function Login() {
           secureTextEntry
         />
 
-        <Button title="Login" onPress={handleLogin} />
+        <TouchableOpacity
+          style={[styles.button, isLoading && styles.buttonLoading]}
+          onPress={handleLogin}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Login</Text>
+          )}
+        </TouchableOpacity>
 
         <View style={styles.signupContainer}>
-          <Text>Don't have an Account?</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+          <Text style={styles.text}>Don't have an Account?</Text>
+          <TouchableOpacity onPress={() => navigation.replace('Signup')}>
             <Text style={styles.signupLink}> Sign Up</Text>
           </TouchableOpacity>
         </View>
@@ -62,35 +72,67 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+    backgroundColor: '#f5f5f5',
     padding: 16,
   },
   form: {
-    marginHorizontal: 20,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
   },
-  label: {
-    fontSize: 16,
-    marginBottom: 8,
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    textAlign: 'center',
+    color: '#333',
   },
   input: {
-    height: 40,
-    borderColor: 'gray',
+    height: 48,
+    borderColor: '#ddd',
     borderWidth: 1,
-    borderRadius: 4,
-    paddingHorizontal: 8,
+    borderRadius: 8,
+    paddingHorizontal: 16,
     marginBottom: 16,
+    backgroundColor: '#f9f9f9',
   },
-  text: {
-    fontSize: 14,
-    color: 'gray',
+  helperText: {
+    fontSize: 12,
+    color: '#888',
     marginBottom: 16,
+    textAlign: 'center',
+  },
+  button: {
+    backgroundColor: '#007bff',
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  buttonLoading: {
+    backgroundColor: '#0056b3',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   signupContainer: {
     flexDirection: 'row',
     marginTop: 16,
+    justifyContent: 'center',
+  },
+  text: {
+    color: '#333',
   },
   signupLink: {
-    color: 'blue',
+    color: '#007bff',
     marginLeft: 4,
+    fontWeight: 'bold',
   },
 });
 
